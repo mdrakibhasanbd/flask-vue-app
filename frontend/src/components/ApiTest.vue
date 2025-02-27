@@ -1,6 +1,6 @@
 <template>
     <div>
-      <h2>Hello Flask API</h2>
+      <h2>GIT BRANCH CHANGE</h2>
       <p v-if="loading">Loading...</p>
       <p v-else-if="error" class="error">{{ error }}</p>
       <p v-else>{{ message }}</p>
