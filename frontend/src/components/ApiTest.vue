@@ -1,6 +1,6 @@
 <template>
     <div>
-      <h2>Flask API Response update</h2>
+      <h2>Flask API Response</h2>
       <p v-if="loading">Loading...</p>
       <p v-else-if="error" class="error">{{ error }}</p>
       <p v-else>{{ message }}</p>
@@ -19,7 +19,7 @@
       };
     },
     mounted() {
-      axios.get("http://localhost:5008/api/test")
+      axios.get("/api/v1/test")
         .then(response => {
           this.message = response.data.message;
         })

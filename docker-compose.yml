@@ -1,16 +1,30 @@
+version: '3.8'
+
 services:
-  backend:
+  flask-backend:
     build: ./backend
     ports:
-      - "5008:5000"
-    env_file:
-      - .env
+      - "5008:5008"
     restart: always
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.50.100  # Static IP for Flask backend
 
-  frontend:
+  vue-frontend:
     build: ./frontend
     ports:
       - "8081:80"
     depends_on:
-      - backend
+      - flask-backend
     restart: always
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.50.101  # Static IP for Vue frontend
+
+networks:
+  mynetwork:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.50.0/24  # Custom subnet
+
