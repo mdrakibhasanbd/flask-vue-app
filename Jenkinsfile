@@ -10,15 +10,28 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                    git branch: 'main', url: 'https://github.com/mdrakibhasanbd/flask-vue-app.git'
+                git branch: 'main', url: 'https://github.com/mdrakibhasanbd/flask-vue-app.git'
             }
         }
 
         stage('Setup Python Environment') {
             steps {
                 script {
+                    // Create the virtual environment
                     sh 'python3 -m venv venv'
-                    sh '. venv/bin/activate && pip install -r requirements.txt'
+                    
+                    // Ensure bump2version is in requirements.txt and install dependencies
+                    sh '''echo "bump2version" >> requirements.txt
+                         . venv/bin/activate && pip install -r requirements.txt'''
+                }
+            }
+        }
+
+        stage('Versioning Flask') {
+            steps {
+                script {
+                    // Versioning Flask (e.g., increment patch version)
+                    sh '. venv/bin/activate && bump2version patch'
                 }
             }
         }
@@ -28,15 +41,6 @@ pipeline {
                 script {
                     // Install Node.js dependencies
                     sh 'npm install'
-                }
-            }
-        }
-
-        stage('Versioning Flask') {
-            steps {
-                script {
-                    // Versioning Flask (e.g., increment patch version)
-                    sh 'bump2version patch'
                 }
             }
         }
@@ -54,9 +58,9 @@ pipeline {
             steps {
                 script {
                     // Build Docker images using docker-compose
-                    sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} build'
+                    sh "docker-compose -f ${DOCKER_COMPOSE_PATH} build"
                     // Optionally push Docker images to a registry if needed
-                    // sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} push'
+                    // sh "docker-compose -f ${DOCKER_COMPOSE_PATH} push"
                 }
             }
         }
@@ -65,8 +69,8 @@ pipeline {
             steps {
                 script {
                     // Take down any existing containers and bring them back up with docker-compose
-                    sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} down'
-                    sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} up -d'
+                    sh "docker-compose -f ${DOCKER_COMPOSE_PATH} down"
+                    sh "docker-compose -f ${DOCKER_COMPOSE_PATH} up -d"
                 }
             }
         }
