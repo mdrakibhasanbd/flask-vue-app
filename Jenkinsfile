@@ -2,47 +2,50 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_COMPOSE_PATH = "/var/lib/jenkins/workspace/flask-vue-app/docker-compose.yml"
         PYTHON = '/usr/bin/python3'
         NODE = '/usr/bin/node'
+        DOCKER_COMPOSE_PATH = '/var/lib/jenkins/workspace/flask-vue-app/docker-compose.yml'
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', credentialsId: 'your-credentials-id', url: 'https://github.com/mdrakibhasanbd/flask-vue-app.git'
+                git 'https://github.com/mdrakibhasanbd/flask-vue-app.git'
             }
         }
 
-        stage('Setup Dependencies') {
+        stage('Setup Python Environment') {
             steps {
-                sh 'pip install --upgrade bump2version'
-                sh 'npm install'
+                script {
+                    sh 'python3 -m venv venv'
+                    sh '. venv/bin/activate && pip install -r requirements.txt'
+                }
+            }
+        }
+
+        stage('Setup Node Environment') {
+            steps {
+                script {
+                    // Install Node.js dependencies
+                    sh 'npm install'
+                }
             }
         }
 
         stage('Versioning Flask') {
             steps {
-                sh 'bump2version patch'
+                script {
+                    // Versioning Flask (e.g., increment patch version)
+                    sh 'bump2version patch'
+                }
             }
         }
 
         stage('Versioning Vue') {
             steps {
-                sh 'npm run release'
-            }
-        }
-
-        stage('Push Version Changes') {
-            steps {
                 script {
-                    sh '''
-                    git config user.email "jenkins@yourdomain.com"
-                    git config user.name "Jenkins CI"
-                    git add .
-                    git commit -m "Automated version bump"
-                    git push --follow-tags
-                    '''
+                    // Run Vue.js versioning (e.g., through a custom npm script)
+                    sh 'npm run release'
                 }
             }
         }
@@ -50,7 +53,10 @@ pipeline {
         stage('Build and Push Docker Images') {
             steps {
                 script {
-                    sh 'docker-compose build'
+                    // Build Docker images using docker-compose
+                    sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} build'
+                    // Optionally push Docker images to a registry if needed
+                    // sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} push'
                 }
             }
         }
@@ -58,8 +64,9 @@ pipeline {
         stage('Deploy Application') {
             steps {
                 script {
-                    sh 'docker-compose down'
-                    sh 'docker-compose up -d'
+                    // Take down any existing containers and bring them back up with docker-compose
+                    sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} down'
+                    sh 'docker-compose -f ${DOCKER_COMPOSE_PATH} up -d'
                 }
             }
         }
