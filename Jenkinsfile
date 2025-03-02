@@ -31,7 +31,10 @@ pipeline {
             steps {
                 script {
                     // Use bump2version to increment patch version automatically
-                    sh '. venv/bin/activate && bump2version patch --new-version $(python setup.py --version) --no-tag --no-commit'
+                    sh '''
+                    . venv/bin/activate
+                    bump2version patch --new-version 1.0.1 --no-tag --no-commit
+                    '''
                 }
             }
         }
