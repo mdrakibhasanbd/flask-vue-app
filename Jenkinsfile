@@ -30,8 +30,8 @@ pipeline {
         stage('Versioning Flask') {
             steps {
                 script {
-                    // Versioning Flask (e.g., increment patch version)
-                    sh '. venv/bin/activate && bump2version patch'
+                    // Use bump2version to increment patch version automatically
+                    sh '. venv/bin/activate && bump2version patch --new-version $(python setup.py --version) --no-tag --no-commit'
                 }
             }
         }
