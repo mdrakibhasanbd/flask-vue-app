@@ -9,10 +9,6 @@ from pymongo.errors import ServerSelectionTimeoutError
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/api/v1/test', methods=['GET'])
-def test_api():
-    return jsonify({"message": "Hello from Flask API!", "status": "success"})
-
 def get_mongo_db():
     try:
         load_dotenv()
@@ -38,9 +34,12 @@ if mongo_client is None:
 client, database = get_mongo_db()
 item_collection = database.get_collection("items")
 
+@app.route('/api/v1/test', methods=['GET'])
+def test_api():
+    return jsonify({"message": "Hello from Flask API!", "status": "success"})
 
 # Create (Insert Data)
-@app.route("/add-item", methods=["POST"])
+@app.route("/api/v1/add-item", methods=["POST"])
 def create_item():
     data = request.json
     if not data or "name" not in data or "price" not in data:
@@ -51,7 +50,7 @@ def create_item():
 
 
 # Read (Get All Data)
-@app.route("/get-items", methods=["GET"])
+@app.route("/api/v1/get-items", methods=["GET"])
 def get_items():
     items = []
     for item in item_collection.find():
@@ -60,7 +59,7 @@ def get_items():
 
 
 # Read (Get Single Data by ID)
-@app.route("/get-item-by-id/<_id>", methods=["GET"])
+@app.route("/api/v1/get-item-by-id/<_id>", methods=["GET"])
 def get_item(_id):
     item = item_collection.find_one({"_id": ObjectId(_id)})
     if item:
@@ -69,7 +68,7 @@ def get_item(_id):
 
 
 # Update (Modify Data)
-@app.route("/update-item/<_id>", methods=["PUT"])
+@app.route("/api/v1/update-item/<_id>", methods=["PUT"])
 def update_item(_id):
     data = request.json
     updated_item = item_collection.find_one_and_update(
@@ -83,7 +82,7 @@ def update_item(_id):
 
 
 # Delete (Remove Data)
-@app.route("/delete-item/<_id>", methods=["DELETE"])
+@app.route("/api/v1/delete-item/<_id>", methods=["DELETE"])
 def delete_item(_id):
     result = item_collection.delete_one({"_id": ObjectId(_id)})
     if result.deleted_count:
